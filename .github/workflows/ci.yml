@@ -59,13 +59,18 @@ jobs:
         run: git checkout --detach "$GITHUB_REF_NAME"
       - name: Read the tag
         id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          # A release published by hand (local build signed with the same key) is final.
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; fi
           module="${GITHUB_REF_NAME%%-v*}"
           version="${GITHUB_REF_NAME#*-v}"
           grep -q "versionName = \"$version\"" "tts-$module/build.gradle.kts" || { echo "versionName in tts-$module differs from $version"; exit 1; }
           echo "module=$module" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Restore Folio's signing key
+        if: steps.tag.outputs.skip != 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
         run: |
@@ -73,11 +78,13 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/folio.keystore"
           echo "ANDROID_DEBUG_KEYSTORE_PATH=$RUNNER_TEMP/folio.keystore" >> "$GITHUB_ENV"
       - name: Build and test
+        if: steps.tag.outputs.skip != 'true'
         run: bash ./gradlew :tts-common:testDebugUnitTest :tts-silero:testDebugUnitTest :tts-${{ steps.tag.outputs.module }}:assembleRelease --console=plain
       - name: Remove the signing key
         if: always()
         run: rm -f "$RUNNER_TEMP/folio.keystore"
       - name: Check the certificate and publish
+        if: steps.tag.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           MODULE: ${{ steps.tag.outputs.module }}
