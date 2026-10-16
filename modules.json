@@ -6,22 +6,22 @@
       "package": "app.folio.tts.piper",
       "title": "Folio Piper",
       "description": "Нейросетевые голоса Piper: русский, украинский, английский, немецкий, французский, испанский, итальянский, польский",
-      "versionCode": 0,
-      "versionName": "",
-      "url": "",
-      "sha256": "",
-      "bytes": 0
+      "versionCode": 1,
+      "versionName": "1.0.0",
+      "url": "https://github.com/qbitoks/folio-modules/releases/download/piper-v1.0.0/folio-piper-1.0.0.apk",
+      "sha256": "e8a0525246226c72c6fbf659ac09f9f8609c88fe867a814f16ed7f8b01249220",
+      "bytes": 27374979
     },
     {
       "id": "silero",
       "package": "app.folio.tts.silero",
       "title": "Folio Silero",
       "description": "29 русских голосов Silero, только русский язык",
-      "versionCode": 0,
-      "versionName": "",
-      "url": "",
-      "sha256": "",
-      "bytes": 0
+      "versionCode": 1,
+      "versionName": "1.0.0",
+      "url": "https://github.com/qbitoks/folio-modules/releases/download/silero-v1.0.0/folio-silero-1.0.0.apk",
+      "sha256": "ff071aef96994fd3e8cfaff5b8762eac8f8feb396e7caff238aba8c0e4028b8d",
+      "bytes": 25014569
     }
   ]
 }
