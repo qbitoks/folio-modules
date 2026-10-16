@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voices_title">Голоса %1$s</string>
+    <string name="voices_default">Голос по умолчанию</string>
+    <string name="voices_listen">Прослушать</string>
+    <string name="voices_installed">Установлен</string>
+    <string name="voices_failed">Не удалось скачать</string>
+    <string name="voices_download">Скачать</string>
+    <string name="voices_cancel">Отмена</string>
+    <string name="voices_delete">Удалить</string>
+</resources>

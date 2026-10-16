@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Folio Silero</string>
+    <string name="silero_about">Silero reads Russian only, offline, as a system speech engine. One model (about 65 MB) holds all its voices; numbers are read out in words, Latin letters are skipped.</string>
+</resources>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piper_about">Голоса Piper работают без интернета как системный движок синтеза речи: ими читает Folio и любые другие приложения. Голоса скачиваются из релизов sherpa-onnx на GitHub.</string>
+</resources>

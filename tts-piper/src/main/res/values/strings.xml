@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Folio Piper</string>
+    <string name="piper_about">Piper voices work offline as a system speech engine: Folio and any other app can read with them. Voices are downloaded from the sherpa-onnx releases on GitHub.</string>
+</resources>

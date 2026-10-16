@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voices_title">%1$s voices</string>
+    <string name="voices_default">Default voice</string>
+    <string name="voices_listen">Listen</string>
+    <string name="voices_installed">Installed</string>
+    <string name="voices_failed">Download failed</string>
+    <string name="voices_download">Download</string>
+    <string name="voices_cancel">Cancel</string>
+    <string name="voices_delete">Delete</string>
+</resources>

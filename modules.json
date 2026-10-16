@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "id": "piper",
+      "package": "app.folio.tts.piper",
+      "title": "Folio Piper",
+      "description": "Нейросетевые голоса Piper: русский, украинский, английский, немецкий, французский, испанский, итальянский, польский",
+      "versionCode": 0,
+      "versionName": "",
+      "url": "",
+      "sha256": "",
+      "bytes": 0
+    },
+    {
+      "id": "silero",
+      "package": "app.folio.tts.silero",
+      "title": "Folio Silero",
+      "description": "29 русских голосов Silero, только русский язык",
+      "versionCode": 0,
+      "versionName": "",
+      "url": "",
+      "sha256": "",
+      "bytes": 0
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "catalogs": [
+    {
+      "id": "flibusta",
+      "title": "Флибуста",
+      "address": "https://flibusta.is/opds",
+      "searchBooks": "https://flibusta.is/opds/search?searchType=books&searchTerm={searchTerms}",
+      "searchAuthors": "https://flibusta.is/opds/search?searchType=authors&searchTerm={searchTerms}",
+      "newBooks": "https://flibusta.is/opds/new/0/new",
+      "format": "FB2",
+      "description": "Большая библиотека на русском: FB2, EPUB",
+      "russian": true
+    },
+    {
+      "id": "librusec",
+      "title": "Либрусек",
+      "address": "https://lib.rus.ec/opds",
+      "description": "Художественная, фантастика, техническая литература",
+      "note": "Скачивание только после входа на сайте.",
+      "russian": true
+    },
+    {
+      "id": "iknigi",
+      "title": "iKnigi",
+      "address": "https://iknigi.net/opds",
+      "description": "Художественная и современная литература",
+      "note": "Отдаёт только ознакомительные фрагменты с ЛитРес.",
+      "russian": true
+    },
+    {
+      "id": "ekniga",
+      "title": "EKNIGA",
+      "address": "https://ekniga.org/opds",
+      "description": "Книги разных жанров",
+      "russian": true
+    },
+    {
+      "id": "imwerden",
+      "title": "ImWerden",
+      "address": "https://imwerden.de/opds/",
+      "description": "Русская классика, редкие и архивные издания",
+      "russian": true
+    },
+    {
+      "id": "anarchist",
+      "title": "Библиотека анархизма",
+      "address": "https://ru.anarchistlibraries.net/opds",
+      "description": "Философия, история, общественная мысль",
+      "russian": true
+    },
+    {
+      "id": "gutenberg",
+      "title": "Project Gutenberg",
+      "address": "https://www.gutenberg.org/ebooks.opds/",
+      "description": "Более 79 000 книг, в основном классика на английском",
+      "russian": false
+    },
+    {
+      "id": "openlibrary",
+      "title": "Open Library",
+      "address": "https://openlibrary.org/opds/",
+      "description": "Классика и архив; многие книги только на время, на сайте",
+      "russian": false
+    },
+    {
+      "id": "wolnelektury",
+      "title": "Wolne Lektury",
+      "address": "https://wolnelektury.pl/opds/",
+      "description": "Польская литература",
+      "russian": false
+    },
+    {
+      "id": "fantasyworlds",
+      "title": "Fantasy Worlds",
+      "address": "https://fantasy-worlds.org/opds",
+      "description": "Фантастика и фэнтези",
+      "russian": true
+    },
+    {
+      "id": "profilib",
+      "title": "PROFILIB",
+      "address": "https://profilib.com/opds/",
+      "description": "Художественная литература",
+      "russian": true
+    },
+    {
+      "id": "knihi",
+      "title": "Knihi.com",
+      "address": "https://knihi.com/opds.xml",
+      "description": "Белорусская литература",
+      "russian": false
+    },
+    {
+      "id": "ebooksgratuits",
+      "title": "Ebooks libres et gratuits",
+      "address": "https://www.ebooksgratuits.com/opds/",
+      "description": "Французская классика",
+      "russian": false
+    },
+    {
+      "id": "openedition",
+      "title": "OpenEdition Books",
+      "address": "https://opds.openedition.org/",
+      "description": "Научные издания на разных языках",
+      "russian": false
+    },
+    {
+      "id": "textos",
+      "title": "Textos.info",
+      "address": "https://www.textos.info/catalogo.atom",
+      "description": "Испанская литература",
+      "russian": false
+    }
+  ]
+}
