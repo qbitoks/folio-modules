@@ -1,11 +1,14 @@
 package app.folio.documents
 
 import android.app.Application
+import android.graphics.Bitmap
 import android.util.Log
 import android.util.LruCache
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.folio.documents.engine.PdfText
+import app.folio.documents.engine.ScanLayout
+import app.folio.documents.engine.ScanPages
 import app.folio.documents.engine.SearchHit
 import app.folio.documents.engine.TocEntry
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +38,11 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
     private val pdfThread = Dispatchers.IO.limitedParallelism(1)
     private var text: PdfText? = null
     private val bookPages = LruCache<Int, CharSequence>(24)
+    /** k2pdfopt is single-threaded and slow: its own thread and its own Pdfium document keep text and search free. */
+    private val scanThread = Dispatchers.Default.limitedParallelism(1)
+    private var scans: ScanPages? = null
+    private var scanText: PdfText? = null
+    private var prefetch: Job? = null
 
     var request: FolioLink.Request? = null
         private set
@@ -88,7 +96,7 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
             _page.value = request.page.coerceIn(0, (opened.pageCount - 1).coerceAtLeast(0))
             _toc.value = withContext(pdfThread) { opened.outline() }
             _hasText.value = withContext(pdfThread) { opened.hasText() }
-            if (_hasText.value == false && _prefs.value.mode == Mode.Book) update { it.copy(mode = Mode.Pages) }
+            if (_hasText.value == false && _prefs.value.mode == Mode.Book) update { it.copy(mode = Mode.Scan) }
         }
         // Folio gets the page a moment after the reader settles on it.
         viewModelScope.launch {
@@ -122,6 +130,35 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
         bookPages.get(page)?.let { return it }
         val doc = text ?: return null
         return withContext(pdfThread) { doc.pageBook(page) }?.also { bookPages.put(page, it) }
+    }
+
+    /** [page] reflowed for «Скан как книга», from the caches when it was done before; null when it fails. */
+    suspend fun scanPage(page: Int, layout: ScanLayout): Bitmap? {
+        scans?.cached(page, layout)?.let { return it }
+        // The page on screen goes before the read-ahead queue.
+        prefetch?.cancel()
+        return withContext(scanThread) { scanPages()?.page(page, layout) }
+    }
+
+    /** Reflows the pages after [page] in the background so turning to them doesn't wait. */
+    fun prefetchScans(page: Int, layout: ScanLayout) {
+        prefetch?.cancel()
+        prefetch = viewModelScope.launch(scanThread) {
+            for (p in page + 1..minOf(page + PREFETCH, _pageCount.value - 1)) {
+                if (!isActive) break
+                scanPages()?.page(p, layout)
+            }
+        }
+    }
+
+    private fun scanPages(): ScanPages? {
+        scans?.let { return it }
+        val r = request ?: return null
+        val doc = runCatching { PdfText.open(getApplication(), r.uri) }.onFailure { Log.w(TAG, "Open for scans", it) }.getOrNull()
+            ?: return null
+        scanText = doc
+        val id = r.bookId.filter { it.isLetterOrDigit() }.ifEmpty { "book" }
+        return ScanPages(doc, ScanPages.bookDir(getApplication<Application>().cacheDir, id)).also { scans = it }
     }
 
     fun search(query: String) {
@@ -159,9 +196,14 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
         // Close on the Pdfium thread so a page in flight finishes first.
         @Suppress("OPT_IN_USAGE")
         kotlinx.coroutines.GlobalScope.launch(pdfThread) { doc?.close() }
+        val scanDoc = scanText
+        scanText = null
+        @Suppress("OPT_IN_USAGE")
+        kotlinx.coroutines.GlobalScope.launch(scanThread) { scanDoc?.close() }
     }
 
     private companion object {
         const val TAG = "PdfViewModel"
+        const val PREFETCH = 2
     }
 }

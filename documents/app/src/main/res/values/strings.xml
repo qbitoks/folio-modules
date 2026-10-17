@@ -7,6 +7,9 @@
     <string name="appearance">Themes and settings</string>
     <string name="mode_pages">Original</string>
     <string name="mode_book">As a book</string>
+    <string name="mode_scan">Scan as book</string>
+    <string name="scan_hint">Pages are rebuilt from their images: columns in order, formulas and figures as pictures. A page can take a few seconds.</string>
+    <string name="scan_offer">A scan: read it as a book</string>
     <string name="page_of">Page %1$d of %2$d</string>
     <string name="pages_left">%1$d pages left</string>
     <string name="toc_empty">This PDF has no table of contents</string>
@@ -14,7 +17,7 @@
     <string name="search_nothing">Nothing found</string>
     <string name="search_page">Page %1$d</string>
     <string name="searching">Searching… %1$d %%</string>
-    <string name="no_text">This PDF has no text layer (a scan): «As a book» is unavailable</string>
+    <string name="no_text">This PDF has no text layer (it is a scan): read it with «Scan as book»</string>
     <string name="page_no_text">No text on this page</string>
     <string name="theme">Theme</string>
     <string name="theme_original">Original</string>
@@ -30,7 +33,7 @@
     <string name="spacing">Line spacing</string>
     <string name="volume_keys">Turn pages with volume keys</string>
     <string name="open_failed">Couldn’t open the PDF</string>
-    <string name="about">Based on MJ PDF by Mudlej. GPL-3.0, source code: github.com/qbitoks/folio-modules</string>
+    <string name="about">Based on MJ PDF by Mudlej and k2pdfopt (willus.com, KOReader). AGPL-3.0, source code: github.com/qbitoks/folio-modules</string>
     <string name="previous_page">Previous page</string>
     <string name="next_page">Next page</string>
 </resources>

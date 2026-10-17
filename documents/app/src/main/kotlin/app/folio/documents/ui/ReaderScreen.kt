@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -109,11 +111,16 @@ private fun ReaderContent(vm: PdfViewModel, onClose: () -> Unit) {
                 pageCount = pageCount, startPage = modeStart, prefs = prefs, loadPage = vm::bookPage,
                 jumps = vm.jumps, turns = vm.turns, onPage = vm::onPage, onTap = onTap, modifier = Modifier.fillMaxSize(),
             )
+            prefs.mode == Mode.Scan && pageCount > 0 -> ScanView(
+                pageCount = pageCount, startPage = modeStart, prefs = prefs, loadPage = vm::scanPage, prefetch = vm::prefetchScans,
+                jumps = vm.jumps, turns = vm.turns, onPage = vm::onPage, onTap = onTap, modifier = Modifier.fillMaxSize(),
+            )
             prefs.mode == Mode.Pages -> PagesView(
                 uri = request.uri, startPage = modeStart, prefs = prefs, jumps = vm.jumps, turns = vm.turns,
                 onPage = { p, _ -> vm.onPage(p) }, onTap = onTap, onFailed = { }, modifier = Modifier.fillMaxSize(),
             )
         }
+        ScanOffer(vm, visible = !chrome, Modifier.align(Alignment.BottomCenter))
         AnimatedVisibility(chrome, enter = fadeIn() + slideInVertically { -it }, exit = fadeOut() + slideOutVertically { -it }) {
             TopBar(request.title, onClose)
         }
@@ -129,6 +136,34 @@ private fun ReaderContent(vm: PdfViewModel, onClose: () -> Unit) {
         Sheet.Search -> SearchSheet(vm, onDismiss = { sheet = null }, onPick = { vm.jumpTo(it); sheet = null; chrome = false })
         Sheet.Themes -> ThemesSheet(vm, onDismiss = { sheet = null })
         null -> Unit
+    }
+}
+
+/** A scan opened in «Оригинал»: offers «Скан как книга» for a few seconds, once per opening. */
+@Composable
+private fun ScanOffer(vm: PdfViewModel, visible: Boolean, modifier: Modifier) {
+    val prefs by vm.prefs.collectAsStateWithLifecycle()
+    val hasText by vm.hasText.collectAsStateWithLifecycle()
+    var shown by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(hasText) {
+        if (hasText == false && shown == null && prefs.mode == Mode.Pages) {
+            shown = true
+            delay(6_000)
+            shown = false
+        }
+    }
+    val c = Folio.colors
+    AnimatedVisibility(visible && shown == true && prefs.mode == Mode.Pages, modifier, enter = fadeIn(), exit = fadeOut()) {
+        Row(
+            Modifier.padding(WindowInsets.navigationBars.asPaddingValues()).padding(bottom = 24.dp)
+                .clip(CircleShape).background(c.label)
+                .clickable(role = Role.Button) { vm.update { it.copy(mode = Mode.Scan) }; shown = false }
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Icon(Icons.Rounded.AutoStories, null, tint = c.background, modifier = Modifier.size(22.dp))
+            Text(stringResource(R.string.scan_offer), style = FolioType.headline, color = c.background)
+        }
     }
 }
 
@@ -195,10 +230,12 @@ private fun BottomPanel(vm: PdfViewModel, page: Int, pageCount: Int, onSheet: (S
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 4.dp, bottom = 8.dp)) {
             Action(Icons.Rounded.TextFields, stringResource(R.string.appearance), Modifier.weight(1f)) { onSheet(Sheet.Themes) }
+            // Text PDFs reflow their text, scans their page images.
+            val reflow = if (hasText == true) Mode.Book else Mode.Scan
             Action(
-                Icons.Rounded.AutoStories, stringResource(R.string.mode_book), Modifier.weight(1f),
-                active = prefs.mode == Mode.Book, enabled = hasText == true,
-            ) { vm.update { it.copy(mode = if (it.mode == Mode.Book) Mode.Pages else Mode.Book) } }
+                Icons.Rounded.AutoStories, stringResource(if (reflow == Mode.Book) R.string.mode_book else R.string.mode_scan), Modifier.weight(1f),
+                active = prefs.mode != Mode.Pages, enabled = hasText != null,
+            ) { vm.update { it.copy(mode = if (it.mode == Mode.Pages) reflow else Mode.Pages) } }
             Action(Icons.Rounded.Search, stringResource(R.string.search), Modifier.weight(1f), enabled = hasText == true) { onSheet(Sheet.Search) }
         }
     }

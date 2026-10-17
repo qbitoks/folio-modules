@@ -2,6 +2,8 @@
 package app.folio.documents.engine
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.util.Log
 import com.shockwave.pdfium.PdfDocument
@@ -10,6 +12,9 @@ import java.io.Closeable
 
 /** One entry of the PDF's own outline, flattened: [level] 0 is the top. */
 data class TocEntry(val title: String, val page: Int, val level: Int)
+
+/** A page rendered grey: [width] × [height] bytes at [pxPerPoint] pixels per point. */
+class GreyPage(val width: Int, val height: Int, val pxPerPoint: Float, val pixels: ByteArray)
 
 /** A search hit: [page] (zero-based) and a snippet around the match. */
 data class SearchHit(val page: Int, val snippet: String)
@@ -52,6 +57,37 @@ class PdfText private constructor(private val core: PdfiumCore, private val doc:
         if (!structured.isNullOrBlank()) return structured
         val plain = pageText(page)
         return if (plain.isBlank()) null else TextModeTextFormatter.formatJoined(plain)
+    }
+
+    /**
+     * [page] as 8-bit grey (255 = paper) at [pxPerPoint] pixels per PDF point, scaled down so the long side fits
+     * [maxSide]; null when it fails. The scale actually used is [GreyPage.pxPerPoint].
+     */
+    fun pageGrey(page: Int, pxPerPoint: Float, maxSide: Int = 4200): GreyPage? = withPage(page) {
+        val size = core.getPageSizePoint(doc, page)
+        if (size.width <= 0f || size.height <= 0f) return@withPage null
+        val scale = minOf(pxPerPoint, maxSide / maxOf(size.width, size.height))
+        val w = (size.width * scale).toInt().coerceAtLeast(1)
+        val h = (size.height * scale).toInt().coerceAtLeast(1)
+        // RGB_565 halves the peak memory of a big page; grey needs no more.
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565)
+        try {
+            bitmap.eraseColor(Color.WHITE)
+            core.renderPageBitmap(doc, bitmap, page, 0, 0, w, h)
+            val row = IntArray(w)
+            val grey = ByteArray(w * h)
+            for (y in 0 until h) {
+                bitmap.getPixels(row, 0, w, 0, y, w, 1)
+                val o = y * w
+                for (x in 0 until w) {
+                    val c = row[x]
+                    grey[o + x] = (((c shr 16 and 0xFF) * 77 + (c shr 8 and 0xFF) * 150 + (c and 0xFF) * 29) shr 8).toByte()
+                }
+            }
+            GreyPage(w, h, scale, grey)
+        } finally {
+            bitmap.recycle()
+        }
     }
 
     /** Whether the first pages carry text at all (scans don't): decides if «Как книга» is offered. */

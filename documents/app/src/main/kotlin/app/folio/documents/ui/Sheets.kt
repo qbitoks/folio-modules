@@ -158,15 +158,21 @@ internal fun ThemesSheet(vm: PdfViewModel, onDismiss: () -> Unit) {
     FolioSheet(onDismiss) {
         SheetHeader(stringResource(R.string.appearance), trailing = { CircleButton(Icons.Rounded.Close, stringResource(R.string.close), onDismiss) })
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 24.dp)) {
-            if (hasText == true) {
+            // Scans have no text for «Как книга»; their page images still reflow.
+            val modes = if (hasText == true) listOf(Mode.Pages, Mode.Book, Mode.Scan) else listOf(Mode.Pages, Mode.Scan)
+            if (hasText != null) {
                 SegmentedControl(
-                    listOf(stringResource(R.string.mode_pages), stringResource(R.string.mode_book)),
-                    selected = prefs.mode.ordinal,
-                    onSelect = { i -> vm.update { it.copy(mode = Mode.entries[i]) } },
+                    modes.map { stringResource(it.label) },
+                    selected = modes.indexOf(prefs.mode).coerceAtLeast(0),
+                    onSelect = { i -> vm.update { it.copy(mode = modes[i]) } },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).fillMaxWidth(),
                 )
-            } else if (hasText == false) {
-                Text(stringResource(R.string.no_text), style = FolioType.footnote, color = c.secondaryLabel, modifier = Modifier.padding(horizontal = 32.dp))
+            }
+            if (hasText == false || prefs.mode == Mode.Scan) {
+                Text(
+                    stringResource(if (hasText == false) R.string.no_text else R.string.scan_hint), style = FolioType.footnote,
+                    color = c.secondaryLabel, modifier = Modifier.padding(horizontal = 32.dp, vertical = 4.dp),
+                )
             }
             GroupHeader(stringResource(R.string.theme))
             ThemeRow(prefs.theme) { t -> vm.update { it.copy(theme = t) } }
@@ -184,6 +190,12 @@ internal fun ThemesSheet(vm: PdfViewModel, onDismiss: () -> Unit) {
                         IosSwitch(prefs.crop, { v -> vm.update { it.copy(crop = v) } })
                     })
                 }
+            } else if (prefs.mode == Mode.Scan) {
+                GroupHeader(stringResource(R.string.text_size))
+                IosSlider(
+                    prefs.scanZoom, { v -> vm.update { it.copy(scanZoom = v) } }, valueRange = 0.6f..2f,
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
             } else {
                 GroupHeader(stringResource(R.string.font))
                 SegmentedControl(
@@ -216,6 +228,13 @@ internal fun ThemesSheet(vm: PdfViewModel, onDismiss: () -> Unit) {
         }
     }
 }
+
+private val Mode.label: Int
+    get() = when (this) {
+        Mode.Pages -> R.string.mode_pages
+        Mode.Book -> R.string.mode_book
+        Mode.Scan -> R.string.mode_scan
+    }
 
 /** Four page swatches like Folio's palette cards. */
 @Composable

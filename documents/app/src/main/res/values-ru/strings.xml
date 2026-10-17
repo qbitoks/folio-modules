@@ -6,6 +6,9 @@
     <string name="appearance">Темы и настройки</string>
     <string name="mode_pages">Оригинал</string>
     <string name="mode_book">Как книга</string>
+    <string name="mode_scan">Скан как книга</string>
+    <string name="scan_hint">Страницы собираются по изображению: колонки по порядку, формулы и рисунки картинками. Первая страница — до нескольких секунд.</string>
+    <string name="scan_offer">Это скан: читать как книгу</string>
     <string name="page_of">Стр. %1$d из %2$d</string>
     <string name="pages_left">Осталось стр.: %1$d</string>
     <string name="toc_empty">В этом PDF нет оглавления</string>
@@ -13,7 +16,7 @@
     <string name="search_nothing">Ничего не найдено</string>
     <string name="search_page">Стр. %1$d</string>
     <string name="searching">Ищем… %1$d %%</string>
-    <string name="no_text">В этом PDF нет текстового слоя (это скан): «Как книга» недоступна</string>
+    <string name="no_text">В этом PDF нет текстового слоя (это скан): его можно читать в режиме «Скан как книга»</string>
     <string name="page_no_text">На этой странице нет текста</string>
     <string name="theme">Тема</string>
     <string name="theme_original">Оригинал</string>
@@ -29,7 +32,7 @@
     <string name="spacing">Интервал</string>
     <string name="volume_keys">Листать кнопками громкости</string>
     <string name="open_failed">Не удалось открыть PDF</string>
-    <string name="about">Основано на MJ PDF (Mudlej). GPL-3.0, исходный код: github.com/qbitoks/folio-modules</string>
+    <string name="about">Основано на MJ PDF (Mudlej) и k2pdfopt (willus.com, KOReader). AGPL-3.0, исходный код: github.com/qbitoks/folio-modules</string>
     <string name="previous_page">Предыдущая страница</string>
     <string name="next_page">Следующая страница</string>
 </resources>

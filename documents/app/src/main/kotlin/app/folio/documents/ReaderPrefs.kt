@@ -3,8 +3,11 @@ package app.folio.documents
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 
-/** How the book is shown: the PDF's own pages, or its text laid out like a book (MJ PDF's text mode). */
-enum class Mode { Pages, Book }
+/**
+ * How the book is shown: the PDF's own pages, its text laid out like a book (MJ PDF's text mode), or its page
+ * images reflowed into one column by k2pdfopt («Скан как книга», works for scans too).
+ */
+enum class Mode { Pages, Book, Scan }
 
 /** Page colours, Folio's reader palettes; in «Оригинал» mode only Original and Night apply (Night inverts pages). */
 enum class PageTheme(val background: Color, val text: Color, val dark: Boolean) {
@@ -27,6 +30,8 @@ data class ReaderPrefs(
     val lineSpacing: Float = 1.45f,
     val font: BookFont = BookFont.Literata,
     val volumeKeys: Boolean = true,
+    /** «Скан как книга»: text size against print. */
+    val scanZoom: Float = 1.0f,
 )
 
 /** Module-wide reading settings and the last page of each book (Folio keeps the real position). */
@@ -42,6 +47,7 @@ class PrefsStore(context: Context) {
         lineSpacing = prefs.getFloat("line_spacing", 1.45f),
         font = enumOr(prefs.getString("font", null), BookFont.Literata),
         volumeKeys = prefs.getBoolean("volume_keys", true),
+        scanZoom = prefs.getFloat("scan_zoom", 1.0f),
     )
 
     fun save(p: ReaderPrefs) {
@@ -54,6 +60,7 @@ class PrefsStore(context: Context) {
             .putFloat("line_spacing", p.lineSpacing)
             .putString("font", p.font.name)
             .putBoolean("volume_keys", p.volumeKeys)
+            .putFloat("scan_zoom", p.scanZoom)
             .apply()
     }
 

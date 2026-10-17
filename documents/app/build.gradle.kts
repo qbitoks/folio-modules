@@ -12,8 +12,8 @@ android {
         applicationId = "app.folio.documents"
         minSdk = 34
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         // Pdfium per ABI: phones (arm64) and the x86_64 emulator only, like the speech engines.
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
     }
@@ -51,6 +51,7 @@ android {
 
 dependencies {
     implementation(project(":documents:viewer"))
+    implementation(project(":documents:reflow"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
