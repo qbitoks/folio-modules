@@ -30,11 +30,11 @@
       "package": "app.folio.documents",
       "title": "Folio Документы",
       "description": "Читалка PDF: «Как книга», «Скан как книга» для сканов и колонок, оглавление, поиск, темы и листание кнопками громкости",
-      "versionCode": 1,
-      "versionName": "1.0.0",
-      "url": "https://github.com/qbitoks/folio-modules/releases/download/documents-v1.0.0/folio-documents-1.0.0.apk",
-      "sha256": "7d5bcaabdc0fd54131194ab74750d9262a91f43d0b0b7850f14b85bc61a88ee3",
-      "bytes": 12518837
+      "versionCode": 2,
+      "versionName": "1.1.0",
+      "url": "https://github.com/qbitoks/folio-modules/releases/download/documents-v1.1.0/folio-documents-1.1.0.apk",
+      "sha256": "9a2e4e64076beefa3aeb1f3530460e71e9ffae6c7712d181c6d275993592bb12",
+      "bytes": 14663552
     }
   ]
 }
