@@ -6,8 +6,8 @@ Engine plugins and shared manifests for Folio (`qbitoks/folio`). Product overvie
 - `tts-common/` — `FolioTtsService` (Android `TextToSpeechService` over a `Synthesizer`), `VoiceStore`
   (pack downloads in `files/voices/<id>/`, HTTPS only, optional SHA-256), `VoicesActivity` (the app's one screen).
 - `tts-piper/` — sherpa-onnx Piper voices; `tts-silero/` — Silero via onnxruntime-android (Russian only).
-- `pdf-mj/` — Folio MJ PDF (GPL-3.0): `pdfium/` + `viewer/` are MJ PDF's engine (Mudlej), `app/` is the Folio-style UI;
-  protocol with Folio in `app/.../FolioLink.kt` (Folio side: `core/data/.../modules/PdfModule.kt`). Details: `pdf-mj/README.md`.
+- `documents/` — Folio Документы (GPL-3.0): `pdfium/` + `viewer/` are MJ PDF's engine (Mudlej), `app/` is the Folio-style UI;
+  protocol with Folio in `app/.../FolioLink.kt` (Folio side: `core/data/.../modules/PdfModule.kt`). Details: `documents/README.md`.
 - `modules.json` — read by Folio (`core/data/.../modules/ModuleIndex.kt`); CI rewrites an entry on release.
 - `catalogs.json` — Folio's preset catalogs (`CatalogPresets`); Folio keeps a bundled copy as fallback.
 
@@ -19,4 +19,4 @@ Engine plugins and shared manifests for Folio (`qbitoks/folio`). Product overvie
 - Release: bump version, tag `<engine>-v<versionName>`; see `README.md`.
 
 ## Check
-`./gradlew :tts-common:testDebugUnitTest :tts-silero:testDebugUnitTest :tts-piper:assembleRelease :tts-silero:assembleRelease :pdf-mj:app:assembleRelease`
+`./gradlew :tts-common:testDebugUnitTest :tts-silero:testDebugUnitTest :tts-piper:assembleRelease :tts-silero:assembleRelease :documents:app:assembleRelease`

@@ -34,7 +34,7 @@ jobs:
       - name: Validate manifests
         run: python3 -c "import json; json.load(open('modules.json')); json.load(open('catalogs.json'))"
       - name: Build and test
-        run: bash ./gradlew :tts-common:testDebugUnitTest :tts-silero:testDebugUnitTest :tts-piper:assembleDebug :tts-silero:assembleDebug :pdf-mj:app:assembleDebug --console=plain
+        run: bash ./gradlew :tts-common:testDebugUnitTest :tts-silero:testDebugUnitTest :tts-piper:assembleDebug :tts-silero:assembleDebug :documents:app:assembleDebug --console=plain
 
   release:
     name: Release an engine

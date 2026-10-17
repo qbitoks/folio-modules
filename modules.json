@@ -26,13 +26,13 @@
   ],
   "viewers": [
     {
-      "id": "pdf-mj",
-      "package": "app.folio.pdf.mj",
-      "title": "Folio MJ PDF",
+      "id": "documents",
+      "package": "app.folio.documents",
+      "title": "Folio Документы",
       "description": "Читалка PDF: режим «Как книга», оглавление, поиск, темы и листание кнопками громкости",
       "versionCode": 1,
       "versionName": "1.0.0",
-      "url": "https://github.com/qbitoks/folio-modules/releases/download/pdf-mj-v1.0.0/folio-mj-pdf-1.0.0.apk",
+      "url": "https://github.com/qbitoks/folio-modules/releases/download/documents-v1.0.0/folio-documents-1.0.0.apk",
       "sha256": "65018f58386a6721cf0d9fc322af5b5d1c97364f60ac9d1a0a7a16631b5e7234",
       "bytes": 12518813
     }

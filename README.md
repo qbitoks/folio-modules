@@ -4,8 +4,8 @@
 
 - **Folio Piper** (`tts-piper`) — нейросетевые голоса Piper (sherpa-onnx), несколько языков.
 - **Folio Silero** (`tts-silero`) — 29 русских голосов Silero v5 (onnxruntime).
-- **Folio MJ PDF** (`pdf-mj`) — читалка PDF в оформлении Folio на движке [MJ PDF](https://gitlab.com/mudlej_android/mj_pdf_reader):
-  режим «Как книга», оглавление, поиск, темы, прокрутка или листание, обрезка полей. Лицензия GPL-3.0 (`pdf-mj/LICENSE`).
+- **Folio Документы** (`documents`) — читалка PDF в оформлении Folio на движке [MJ PDF](https://gitlab.com/mudlej_android/mj_pdf_reader):
+  режим «Как книга», оглавление, поиск, темы, прокрутка или листание, обрезка полей. Лицензия GPL-3.0 (`documents/LICENSE`).
 - **`catalogs.json`** — список OPDS-каталогов, который Folio показывает в «Каталогах».
 - **`modules.json`** — индекс модулей: версия, ссылка на APK, SHA-256, размер. Его читает Folio.
 
@@ -23,7 +23,7 @@ JDK 17, Android SDK platform 37.
 ./gradlew :tts-common:testDebugUnitTest :tts-silero:testDebugUnitTest :tts-piper:assembleRelease :tts-silero:assembleRelease
 ```
 
-Folio MJ PDF — отдельное приложение без значка: его открывает Folio, когда пользователь открывает PDF,
+Folio Документы — отдельное приложение без значка: его открывает Folio, когда пользователь открывает PDF,
 и получает обратно страницу, на которой остановилось чтение.
 
 ## Релиз движка

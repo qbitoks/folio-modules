@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Puts a released module APK into modules.json: update_index.py <module> <apk> <url>.
-Engines live in `modules` (tts-<id>/), viewers in `viewers` (<id>/app/, e.g. pdf-mj)."""
+Engines live in `modules` (tts-<id>/), viewers in `viewers` (<id>/app/, e.g. documents)."""
 import hashlib, json, os, re, sys
 
 module, apk, url = sys.argv[1:4]
