@@ -1,0 +1,4 @@
+libfoliodjvu.so contains:
+- DjVuLibre 3.5.28 (libdjvu) by Léon Bottou, Yann LeCun, AT&T and LizardTech, https://djvu.sourceforge.net.
+  GNU GPL v2 or later (LICENSE).
+- folio_djvu.cpp (JNI bridge), Folio Документы. GNU GPL v2 or later.

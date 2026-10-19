@@ -13,11 +13,11 @@ import java.nio.ByteBuffer
 data class ScanLayout(val width: Int, val height: Int, val dpi: Int, val zoom: Float)
 
 /**
- * «Скан как книга»: each PDF page rendered as an image and reflowed by k2pdfopt into one column of the view's width.
+ * «Скан как книга»: each page rendered as an image and reflowed by k2pdfopt into one column of the view's width.
  * Results are [Bitmap.Config.ALPHA_8] masks (ink = opaque) so any theme can tint them; kept in memory and on disk
  * under [cacheDir], one file per page and layout. Not thread-safe: call from one thread.
  */
-class ScanPages(private val text: PdfText, private val cacheDir: File) {
+class ScanPages(private val images: PageImages, private val cacheDir: File) {
     private val memory = object : LruCache<String, Bitmap>(48 * 1024 * 1024) {
         override fun sizeOf(key: String, value: Bitmap) = value.allocationByteCount
     }
@@ -34,7 +34,7 @@ class ScanPages(private val text: PdfText, private val cacheDir: File) {
     }
 
     private fun reflow(page: Int, layout: ScanLayout): Bitmap? {
-        val grey = text.pageGrey(page, layout.dpi * layout.zoom / 72f) ?: return null
+        val grey = images.pageGrey(page, layout.dpi * layout.zoom / 72f) ?: return null
         val out = runCatching {
             Reflow.reflow(grey.pixels, grey.width, grey.height, layout.width, layout.height, layout.dpi)
         }.onFailure { Log.w(TAG, "Reflow, page $page", it) }.getOrNull() ?: return null

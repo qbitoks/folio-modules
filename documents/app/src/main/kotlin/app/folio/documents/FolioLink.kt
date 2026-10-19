@@ -8,7 +8,7 @@ import android.util.Log
 
 /**
  * The protocol with Folio (its side: `core/data/.../modules/PdfModule.kt`). Folio opens a book with
- * [ACTION_OPEN] and a read-only `content://` URI; the page goes back through Folio's provider. Names are stable API.
+ * [ACTION_OPEN] and a read-only `content://` URI typed PDF or DjVu ([DJVU_TYPES]); the page goes back through Folio's provider. Names are stable API.
  */
 object FolioLink {
     const val ACTION_OPEN = "app.folio.action.OPEN_PDF"
@@ -16,6 +16,7 @@ object FolioLink {
     const val EXTRA_PAGE = "app.folio.extra.PAGE"
     const val EXTRA_TITLE = "app.folio.extra.TITLE"
     const val EXTRA_APPEARANCE = "app.folio.extra.APPEARANCE"
+    val DJVU_TYPES = setOf("image/vnd.djvu", "image/x-djvu")
 
     private val PROVIDER: Uri = Uri.parse("content://app.folio.reading")
     private const val METHOD_POSITION = "position"
@@ -23,7 +24,9 @@ object FolioLink {
     private const val KEY_PAGES = "pages"
 
     /** What Folio asked to open. */
-    data class Request(val uri: Uri, val bookId: String, val page: Int, val title: String, val appearance: String)
+    data class Request(
+        val uri: Uri, val bookId: String, val page: Int, val title: String, val appearance: String, val djvu: Boolean = false,
+    )
 
     fun request(intent: Intent): Request? {
         if (intent.action != ACTION_OPEN) return null
@@ -35,6 +38,7 @@ object FolioLink {
             page = intent.getIntExtra(EXTRA_PAGE, 0).coerceAtLeast(0),
             title = intent.getStringExtra(EXTRA_TITLE).orEmpty(),
             appearance = intent.getStringExtra(EXTRA_APPEARANCE) ?: "auto",
+            djvu = intent.type in DJVU_TYPES,
         )
     }
 

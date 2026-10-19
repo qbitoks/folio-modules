@@ -16,6 +16,12 @@ data class TocEntry(val title: String, val page: Int, val level: Int)
 /** A page rendered grey: [width] × [height] bytes at [pxPerPoint] pixels per point. */
 class GreyPage(val width: Int, val height: Int, val pxPerPoint: Float, val pixels: ByteArray)
 
+/** Page images for «Скан как книга»: PDF through Pdfium, DjVu through DjVuLibre. */
+interface PageImages : Closeable {
+    /** [page] as 8-bit grey (255 = paper) at about [pxPerPoint] pixels per point (1/72 in); null when it fails. */
+    fun pageGrey(page: Int, pxPerPoint: Float, maxSide: Int = 4200): GreyPage?
+}
+
 /** A search hit: [page] (zero-based) and a snippet around the match. */
 data class SearchHit(val page: Int, val snippet: String)
 
@@ -23,7 +29,7 @@ data class SearchHit(val page: Int, val snippet: String)
  * A second Pdfium document next to the one PDFView renders: text, outline and search. Pdfium calls are
  * serialized by PdfiumCore's global lock, so this can run on a background thread while pages render.
  */
-class PdfText private constructor(private val core: PdfiumCore, private val doc: PdfDocument) : Closeable {
+class PdfText private constructor(private val core: PdfiumCore, private val doc: PdfDocument) : PageImages {
     val pageCount: Int = core.getPageCount(doc)
 
     fun outline(): List<TocEntry> {
@@ -63,7 +69,7 @@ class PdfText private constructor(private val core: PdfiumCore, private val doc:
      * [page] as 8-bit grey (255 = paper) at [pxPerPoint] pixels per PDF point, scaled down so the long side fits
      * [maxSide]; null when it fails. The scale actually used is [GreyPage.pxPerPoint].
      */
-    fun pageGrey(page: Int, pxPerPoint: Float, maxSide: Int = 4200): GreyPage? = withPage(page) {
+    override fun pageGrey(page: Int, pxPerPoint: Float, maxSide: Int): GreyPage? = withPage(page) {
         val size = core.getPageSizePoint(doc, page)
         if (size.width <= 0f || size.height <= 0f) return@withPage null
         val scale = minOf(pxPerPoint, maxSide / maxOf(size.width, size.height))

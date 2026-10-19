@@ -115,6 +115,10 @@ private fun ReaderContent(vm: PdfViewModel, onClose: () -> Unit) {
                 pageCount = pageCount, startPage = modeStart, prefs = prefs, loadPage = vm::scanPage, prefetch = vm::prefetchScans,
                 jumps = vm.jumps, turns = vm.turns, onPage = vm::onPage, onTap = onTap, modifier = Modifier.fillMaxSize(),
             )
+            prefs.mode == Mode.Pages && request.djvu -> if (pageCount > 0) DjvuPagesView(
+                pageCount = pageCount, startPage = modeStart, prefs = prefs, loadPage = vm::djvuPage, aspect = vm::djvuAspect,
+                jumps = vm.jumps, turns = vm.turns, onPage = vm::onPage, onTap = onTap, modifier = Modifier.fillMaxSize(),
+            )
             prefs.mode == Mode.Pages -> PagesView(
                 uri = request.uri, startPage = modeStart, prefs = prefs, jumps = vm.jumps, turns = vm.turns,
                 onPage = { p, _ -> vm.onPage(p) }, onTap = onTap, onFailed = { }, modifier = Modifier.fillMaxSize(),
@@ -230,8 +234,12 @@ private fun BottomPanel(vm: PdfViewModel, page: Int, pageCount: Int, onSheet: (S
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 4.dp, bottom = 8.dp)) {
             Action(Icons.Rounded.TextFields, stringResource(R.string.appearance), Modifier.weight(1f)) { onSheet(Sheet.Themes) }
-            // Text PDFs reflow their text, scans their page images.
-            val reflow = if (hasText == true) Mode.Book else Mode.Scan
+            // «Оригинал» ⇄ a reading mode: the one open now, else the last one used (scans only have «Скан»).
+            val reflow = when {
+                prefs.mode != Mode.Pages -> prefs.mode
+                hasText == true -> prefs.lastReflow
+                else -> Mode.Scan
+            }
             Action(
                 Icons.Rounded.AutoStories, stringResource(if (reflow == Mode.Book) R.string.mode_book else R.string.mode_scan), Modifier.weight(1f),
                 active = prefs.mode != Mode.Pages, enabled = hasText != null,

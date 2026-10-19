@@ -1,7 +1,7 @@
 # Folio Документы
 
-PDF reader module for [Folio](https://github.com/qbitoks/folio): MJ PDF's engine under a Compose UI in Folio's design,
-plus k2pdfopt's reflow for «Скан как книга». The app as a whole is under the GNU AGPL v3 (`reflow/LICENSE`): it links
+PDF and DjVu reader module for [Folio](https://github.com/qbitoks/folio): MJ PDF's engine under a Compose UI in Folio's
+design, DjVuLibre for DjVu, plus k2pdfopt's reflow for «Скан как книга» (PDF and DjVu page images). The app as a whole is under the GNU AGPL v3 (`reflow/LICENSE`): it links
 AGPL k2pdfopt; MJ PDF's parts stay GPL v3 (`LICENSE`), which allows that combination (GPL v3 §13).
 
 ## Origin
@@ -16,6 +16,9 @@ AGPL k2pdfopt; MJ PDF's parts stay GPL v3 (`LICENSE`), which allows that combina
 - `reflow/` — k2pdfopt's page reflow (willus.com) through KOReader's
   [libk2pdfopt](https://github.com/koreader/libk2pdfopt) API, with [Leptonica](http://www.leptonica.org) (BSD-2);
   `reflow/NOTICE`. Only `native/folio_reflow.c` (JNI) and `Reflow.kt` are new. No OCR, no image codecs.
+- `djvu/` — [DjVuLibre](https://djvu.sourceforge.net) 3.5.28 (libdjvu, GPL-2.0-or-later, `djvu/LICENSE`, `djvu/NOTICE`)
+  through `native/folio_djvu.cpp` (JNI) and `DjvuDocument.kt`, both new. DjVu has no «Как книга» or search (no text
+  layer is read); «Оригинал» is `ui/DjvuPagesView.kt`, «Скан как книга» shares `ScanPages`.
 - Fonts: Inter, Literata, PT Serif, Source Serif (SIL OFL 1.1, `app/src/main/assets/licenses/`).
 - Upstream commit used: `30cca2d` (2026-08-24).
 
@@ -39,9 +42,15 @@ is built the same way, in Docker on Windows (the script fetches its sources into
 docker run --rm -v "$PWD/reflow:/reflow" -v /path/to/ndk-r28c-linux:/ndk ubuntu:24.04 bash -c   'apt-get update && apt-get install -y cmake ninja-build git curl ca-certificates && ANDROID_NDK=/ndk /reflow/native/build.sh'
 ```
 
+`djvu/src/main/jniLibs/<abi>/libfoliodjvu.so` comes from `djvu/native/build.sh` the same way (Linux NDK r28c, `make`):
+
+```bash
+docker run --rm -v "$PWD/djvu:/djvu" -v /path/to/ndk-r28c-linux:/ndk ubuntu:24.04 bash -c   'apt-get update && apt-get install -y make curl ca-certificates && ANDROID_NDK=/ndk /djvu/native/build.sh'
+```
+
 ## Protocol with Folio
 
-Folio starts `PdfActivity` with action `app.folio.action.OPEN_PDF`, a read-only `content://` URI and extras
+Folio starts `PdfActivity` with action `app.folio.action.OPEN_PDF`, a read-only `content://` URI typed `application/pdf` or `image/vnd.djvu` (`image/x-djvu` accepted) and extras
 `app.folio.extra.BOOK_ID`, `PAGE` (zero-based), `TITLE`, `APPEARANCE`. The module reports the page with
 `ContentResolver.call("content://app.folio.reading", "position", bookId, {page, pages})`; Folio accepts it only from
 apps signed with its key (`app.folio.permission.READING`). Code: `app/.../FolioLink.kt`.

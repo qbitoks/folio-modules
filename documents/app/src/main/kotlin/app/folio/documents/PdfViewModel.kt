@@ -6,6 +6,8 @@ import android.util.Log
 import android.util.LruCache
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import app.folio.documents.engine.DjvuPages
+import app.folio.documents.engine.PageImages
 import app.folio.documents.engine.PdfText
 import app.folio.documents.engine.ScanLayout
 import app.folio.documents.engine.ScanPages
@@ -31,17 +33,22 @@ import kotlinx.coroutines.withContext
 /** Search state: [hits] null while nothing was searched; [progress] < 1 while running. */
 data class SearchState(val query: String = "", val hits: List<SearchHit>? = null, val progress: Float = 1f)
 
-/** A book opened by Folio: page, settings, outline, search and «Как книга» text. */
+/** A book (PDF or DjVu) opened by Folio: page, settings, outline, search and «Как книга» text. */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class PdfViewModel(app: Application) : AndroidViewModel(app) {
     private val store = PrefsStore(app)
     private val pdfThread = Dispatchers.IO.limitedParallelism(1)
     private var text: PdfText? = null
+    /** A DjVu book instead of [text]: its pages for «Оригинал», no text. */
+    private var djvu: DjvuPages? = null
+    private val djvuPages = object : LruCache<String, Bitmap>(64 * 1024 * 1024) {
+        override fun sizeOf(key: String, value: Bitmap) = value.allocationByteCount
+    }
     private val bookPages = LruCache<Int, CharSequence>(24)
     /** k2pdfopt is single-threaded and slow: its own thread and its own Pdfium document keep text and search free. */
     private val scanThread = Dispatchers.Default.limitedParallelism(1)
     private var scans: ScanPages? = null
-    private var scanText: PdfText? = null
+    private var scanText: PageImages? = null
     private var prefetch: Job? = null
 
     var request: FolioLink.Request? = null
@@ -83,7 +90,9 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
         if (this.request?.bookId == request.bookId && this.request?.uri == request.uri) return
         this.request = request
         _page.value = request.page
-        viewModelScope.launch {
+        if (request.djvu) {
+            openDjvu(request)
+        } else viewModelScope.launch {
             val opened = withContext(pdfThread) {
                 runCatching { PdfText.open(getApplication(), request.uri) }.onFailure { Log.w(TAG, "Open", it) }.getOrNull()
             }
@@ -104,6 +113,34 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    private fun openDjvu(request: FolioLink.Request) = viewModelScope.launch {
+        val opened = withContext(pdfThread) {
+            runCatching { DjvuPages.open(getApplication(), request.uri) }.onFailure { Log.w(TAG, "Open DjVu", it) }.getOrNull()
+        }
+        if (opened == null) {
+            _failed.value = true
+            return@launch
+        }
+        djvu = opened
+        _pageCount.value = opened.pageCount
+        _page.value = request.page.coerceIn(0, (opened.pageCount - 1).coerceAtLeast(0))
+        _toc.value = withContext(pdfThread) { opened.outline() }
+        // DjVu has no text here: «Оригинал» and «Скан как книга» only.
+        _hasText.value = false
+        if (_prefs.value.mode == Mode.Book) update { it.copy(mode = Mode.Scan) }
+    }
+
+    /** DjVu [page] fitted into [width] × [height] px, cached; null when it can't be decoded. */
+    suspend fun djvuPage(page: Int, width: Int, height: Int): Bitmap? {
+        val key = "${page}_${width}x$height"
+        djvuPages.get(key)?.let { return it }
+        val doc = djvu ?: return null
+        return withContext(pdfThread) { doc.render(page, width, height) }?.also { djvuPages.put(key, it) }
+    }
+
+    /** Width / height of DjVu [page], for laying out pages before they render. */
+    fun djvuAspect(page: Int): Float? = djvu?.aspect(page)
+
     fun onPage(page: Int) {
         if (page >= 0) _page.value = page
     }
@@ -119,7 +156,10 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun update(change: (ReaderPrefs) -> ReaderPrefs) {
-        val next = change(_prefs.value)
+        // Only a text PDF has a choice of reading modes; a scan's forced «Скан» isn't one.
+        val next = change(_prefs.value).let {
+            if (it.mode != Mode.Pages && _hasText.value == true) it.copy(lastReflow = it.mode) else it
+        }
         if (next == _prefs.value) return
         _prefs.value = next
         store.save(next)
@@ -154,8 +194,9 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
     private fun scanPages(): ScanPages? {
         scans?.let { return it }
         val r = request ?: return null
-        val doc = runCatching { PdfText.open(getApplication(), r.uri) }.onFailure { Log.w(TAG, "Open for scans", it) }.getOrNull()
-            ?: return null
+        val doc = runCatching<PageImages> {
+            if (r.djvu) DjvuPages.open(getApplication(), r.uri) else PdfText.open(getApplication(), r.uri)
+        }.onFailure { Log.w(TAG, "Open for scans", it) }.getOrNull() ?: return null
         scanText = doc
         val id = r.bookId.filter { it.isLetterOrDigit() }.ifEmpty { "book" }
         return ScanPages(doc, ScanPages.bookDir(getApplication<Application>().cacheDir, id)).also { scans = it }
@@ -191,8 +232,9 @@ class PdfViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     override fun onCleared() {
-        val doc = text
+        val doc: PageImages? = text ?: djvu
         text = null
+        djvu = null
         // Close on the Pdfium thread so a page in flight finishes first.
         @Suppress("OPT_IN_USAGE")
         kotlinx.coroutines.GlobalScope.launch(pdfThread) { doc?.close() }

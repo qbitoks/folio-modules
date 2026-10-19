@@ -22,6 +22,8 @@ enum class BookFont { Literata, PtSerif, SourceSerif }
 
 data class ReaderPrefs(
     val mode: Mode = Mode.Pages,
+    /** The reading mode («Как книга» or «Скан») the toolbar button returns to from «Оригинал» in a text PDF. */
+    val lastReflow: Mode = Mode.Book,
     val theme: PageTheme = PageTheme.Original,
     /** Vertical continuous scroll instead of one page per swipe. */
     val scroll: Boolean = false,
@@ -40,6 +42,7 @@ class PrefsStore(context: Context) {
 
     fun load(): ReaderPrefs = ReaderPrefs(
         mode = enumOr(prefs.getString("mode", null), Mode.Pages),
+        lastReflow = enumOr(prefs.getString("last_reflow", null), Mode.Book).takeIf { it != Mode.Pages } ?: Mode.Book,
         theme = enumOr(prefs.getString("theme", null), PageTheme.Original),
         scroll = prefs.getBoolean("scroll", false),
         crop = prefs.getBoolean("crop", false),
@@ -53,6 +56,7 @@ class PrefsStore(context: Context) {
     fun save(p: ReaderPrefs) {
         prefs.edit()
             .putString("mode", p.mode.name)
+            .putString("last_reflow", p.lastReflow.name)
             .putString("theme", p.theme.name)
             .putBoolean("scroll", p.scroll)
             .putBoolean("crop", p.crop)

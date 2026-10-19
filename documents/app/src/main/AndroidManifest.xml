@@ -26,6 +26,8 @@
                 <action android:name="app.folio.action.OPEN_PDF" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/pdf" />
+                <data android:mimeType="image/vnd.djvu" />
+                <data android:mimeType="image/x-djvu" />
             </intent-filter>
         </activity>
     </application>
